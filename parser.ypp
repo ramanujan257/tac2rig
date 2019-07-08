@@ -18,7 +18,7 @@ BasicBlock* getCurrentBB(){
     return currBB;
 }
 
-void setCurrentBB(BasicBlock& bb){
+void setCurrentBB(BasicBlock* bb){
     currBB = bb;
 }
 
@@ -30,7 +30,7 @@ BasicBlock* bbLookup(int address){
         }
     }
     
-    return null;
+    return nullptr;
 }
 
 %}
@@ -38,6 +38,7 @@ BasicBlock* bbLookup(int address){
 %union {
     int num;
     std::string str;
+    BasicBlock* b;
 }
 
 %token<num> num_token
@@ -63,25 +64,25 @@ Linija: num_token ':' id_token ':' '=' E {
             $$ = std::to_string($1) + ":" + $3 + ":=" + $6;
             }
        | num_token ':' id_token '[' id_token ']' ':' '=' E {
-//            $$ = std::to_string($1) + ":" + $3 + "[" + $5 + "]" + $9;
+            $$ = std::to_string($1) + ":" + $3 + "[" + $5 + "]" + $9;
        }
        | num_token ':' if_token E goto_token '(' num_token ')' {
         
             BasicBlock* curr = getCurrentBB();
-            BasicBlock* else = new BasicBlock();
-            basicBlocks.push_back(else);
-            curr->addChild(else);
-            BasicBlock* then = bbLookup($7);
-            if(!then){
-                then = new BasicBlock();
-                basicBlocks.push_back(then);
+            BasicBlock* elseBB = new BasicBlock();
+            basicBlocks.push_back(elseBB);
+            curr->addChild(elseBB);
+            BasicBlock* thenBB = bbLookup($7);
+            if(!thenBB){
+                thenBB = new BasicBlock();
+                basicBlocks.push_back(thenBB);
             }
-            curr->addChild(then);
+            curr->addChild(thenBB);
        
-//            curr->addLine(std::to_string($1) + "if " + $2 + "goto B" + then.getID())
-            $$ = std::to_string($1) + ": if " + $4 + " goto B" + then.getID(); 
+//            curr->addLine(std::to_string($1) + "if " + $2 + "goto B" + thenBB.getID())
+            $$ = std::to_string($1) + ": if " + $4 + " goto B" + std::to_string(thenBB->getID()); 
 
-            setCurrentBB(else);
+            setCurrentBB(elseBB);
        }
        ;
 
@@ -104,3 +105,11 @@ E: E '+' E {
         $$ = std::to_string($1);
     }
     ;
+
+%%
+
+int main(){
+
+    yyparse();
+    return 0;
+}

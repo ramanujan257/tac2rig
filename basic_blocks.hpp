@@ -38,5 +38,3 @@ class BasicBlock{
         std::vector<std::string> _lines;
         std::vector<BasicBlock*> _children;
 };
-
-int BasicBlock::bb_count = 0;

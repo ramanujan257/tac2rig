@@ -13,18 +13,20 @@
 
 %%
 
-[0-9]+  { yylval.num = std::stoi(yytext);
+[0-9]+  { yylval.n= std::stoi(yytext);
           return num_token; }
 
-[a-z][0-9]* { yylval.str = yytext;
+[a-z][0-9]* { yylval.s= new std::string(yytext);
               return id_token;
             }
 
-[:=*+-/<>()\[\]] { return *yytext; }
+[:=*+-/<>()\[\]\n] { return *yytext; }
 
 "goto"  { return goto_token; }
 
-[ \t\n] {}
+[ \t] {}
+
+\%\%.* {}
 
 . {
     std::cerr << "Unknown token: " << *yytext << std::endl;

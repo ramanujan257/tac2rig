@@ -75,12 +75,14 @@ Linija: num_token ':' id_token ':' '=' E {
             BasicBlock* elseBB = new BasicBlock();
             basicBlocks.push_back(elseBB);
             curr->addChild(elseBB);
+            elseBB->addParent(curr);
             BasicBlock* thenBB = bbLookup($7);
             if(!thenBB){
                 thenBB = new BasicBlock();
                 basicBlocks.push_back(thenBB);
             }
             curr->addChild(thenBB);
+            thenBB->addParent(curr);
        
             $$ = new std::string(std::to_string($1) + ": if " + *$4 + " goto B" + std::to_string(thenBB->getID())); 
 

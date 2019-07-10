@@ -12,6 +12,11 @@
 %}
 
 %%
+	/* if i goto moramo da hvatamo pre svega, 
+	   da ga ne bi slucajno pokupio regex za id_token */
+
+"if"	{ return if_token;	}
+"goto"  { return goto_token; }
 
 [0-9]+  { yylval.n= std::stoi(yytext);
           return num_token; }
@@ -20,9 +25,8 @@
               return id_token;
             }
 
-[:=*+-/<>()\[\]\n] { return *yytext; }
+[:=*+/<>()\[\]\n-] { return *yytext; }
 
-"goto"  { return goto_token; }
 
 [ \t] {}
 

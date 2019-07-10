@@ -53,10 +53,9 @@ BasicBlock* bbLookup(int address){
 %left '*'
 
 %%
-
-Program: Program '\n' Linija{
+Program: Program Linija '\n' {
             std::cout << "Program nl Linija" << std::endl;
-            getCurrentBB()->addLine(*$3);
+            getCurrentBB()->addLine(*$2);
         }
         |Linija '\n' {
             std::cout << "Linija" << std::endl;

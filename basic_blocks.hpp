@@ -23,6 +23,18 @@ class BasicBlock{
             _children.push_back(c);
         }
 
+        std::vector<BasicBlock*>& getChildren(){
+            return _children;
+        }
+
+        void addParent(BasicBlock* c){
+            _parents.push_back(c);
+        }
+
+        std::vector<BasicBlock*>& getParents(){
+            return _parents;
+        }
+
         void print(){
             std::cout << "BB" << bb_id << std::endl;
             for(auto l: _lines)
@@ -47,6 +59,7 @@ class BasicBlock{
         int bb_id;
         std::vector<std::string> _lines;
         std::vector<BasicBlock*> _children;
+        std::vector<BasicBlock*> _parents;
 };
 
 std::set<std::string> use(const std::string& line);

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <regex>
 
 class BasicBlock{
     public:
@@ -32,9 +33,24 @@ class BasicBlock{
             return bb_id;
         }
 
+		friend std::set<std::string> use(const std::string& line);
+		friend std::set<std::string> def(const std::string& line);
+
+		friend std::set<std::string> in(const std::string& line);
+		friend std::set<std::string> out(const std::string& line);
+
+		std::set<std::string> in_bb() const;
+		std::set<std::string> out_bb() const;
+
     private:
         static int bb_count;
         int bb_id;
         std::vector<std::string> _lines;
         std::vector<BasicBlock*> _children;
 };
+
+std::set<std::string> use(const std::string& line);
+std::set<std::string> def(const std::string& line);
+                                                         
+std::set<std::string> in(const std::string& line);
+std::set<std::string> out(const std::string& line);

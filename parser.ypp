@@ -67,7 +67,7 @@ Linija: num_token ':' id_token ':' '=' E {
             $$ = new std::string(std::to_string($1) + ":" + *$3 + ":=" + *$6);
             }
        | num_token ':' id_token '[' id_token ']' ':' '=' E {
-            $$ = new std::string(std::to_string($1) + ":" + *$3 + "[" + *$5 + "]" + *$9);
+            $$ = new std::string(std::to_string($1) + ":" + *$3 + "[" + *$5 + "]:=" + *$9);
        }
        | num_token ':' if_token E goto_token '(' num_token ')' {
         

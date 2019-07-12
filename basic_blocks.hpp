@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <regex>
+#include <set>
 
 class BasicBlock{
     public:
@@ -45,11 +46,11 @@ class BasicBlock{
             return bb_id;
         }
 
-		friend std::set<std::string> use(const std::string& line);
-		friend std::set<std::string> def(const std::string& line);
+		friend std::set<std::string> use(const BasicBlock& bb, const std::string& line);
+		friend std::set<std::string> def(const BasicBlock& bb, const std::string& line);
 
-		friend std::set<std::string> in(const std::string& line);
-		friend std::set<std::string> out(const std::string& line);
+		friend std::set<std::string> in(const BasicBlock& bb, const std::string& line);
+		friend std::set<std::string> out(const BasicBlock& bb, const std::string& line);
 
 		std::set<std::string> in_bb() const;
 		std::set<std::string> out_bb() const;

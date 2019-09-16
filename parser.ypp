@@ -27,7 +27,7 @@ void setCurrentBB(BasicBlock* bb){
 BasicBlock* bbLookup(int address){
     for(auto b : basicBlocks){
         for(auto l : b->getLines()){
-            if(std::stoi(l) == address)
+            if(std::stoi(l.line()) == address)
                 return b;
         }
     }
@@ -54,11 +54,11 @@ BasicBlock* bbLookup(int address){
 
 %%
 Program: Program Linija '\n' {
-            std::cout << "Program nl Linija" << std::endl;
+            //std::cout << "Program nl Linija" << std::endl;
             getCurrentBB()->addLine(*$2);
         }
         |Linija '\n' {
-            std::cout << "Linija" << std::endl;
+            //std::cout << "Linija" << std::endl;
             getCurrentBB()->addLine(*$1);
         }
         ;
@@ -114,7 +114,42 @@ E: E '+' E {
 
 int main(){
 
-    yydebug = 1;
+//  yydebug = 1;
+	basicBlocks.push_back(currBB);
+
     yyparse();
+
+	BasicBlock* exitBB = new BasicBlock();
+
+	for (int i=0; i<basicBlocks.size(); i++) {
+		std::vector<BasicBlock*> children = basicBlocks[i]->getChildren();
+		
+		bool exit = true;
+		for (auto c : children) {
+			auto found = std::find(basicBlocks.cbegin(),
+								   basicBlocks.cbegin()+i, c);
+			if (found != basicBlocks.cend()) {
+				exit = false;
+			}
+		}
+		
+		if (exit) basicBlocks[i]->addChild(exitBB);
+	}
+
+	for (auto b : basicBlocks) {
+		std::cout << "B" << b->getID() << ":\n";
+		for (Line l : b->getLines()) {
+			std::cout << l.line() << std::endl;
+		}
+		
+		auto children = b->getChildren();
+		auto found = std::find(children.cbegin(), children.cend(), exitBB);
+		if (found != children.cend()) {
+			std::cout << "->Exit" << std::endl;
+		}
+
+		std::cout << std::endl;
+	}
+
     return 0;
 }

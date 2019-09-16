@@ -6,6 +6,8 @@
 #include <regex>
 #include <set>
 
+#include "line.hpp"
+
 class BasicBlock{
     public:
         BasicBlock()
@@ -13,10 +15,11 @@ class BasicBlock{
         {}
 
         void addLine(std::string& line){
-            _lines.push_back(line);
+			Line l(line);
+            _lines.push_back(l);
         }
 
-        std::vector<std::string> getLines(){
+        std::vector<Line> getLines(){
             return _lines;
         }
 
@@ -46,11 +49,8 @@ class BasicBlock{
             return bb_id;
         }
 
-		friend std::set<std::string> use(const BasicBlock& bb, const std::string& line);
-		friend std::set<std::string> def(const BasicBlock& bb, const std::string& line);
-
-		friend std::set<std::string> in(const BasicBlock& bb, const std::string& line);
-		friend std::set<std::string> out(const BasicBlock& bb, const std::string& line);
+		friend std::set<std::string> in(const BasicBlock& bb, const Line& line);
+		friend std::set<std::string> out(const BasicBlock& bb, const Line& line);
 
 		std::set<std::string> in_bb() const;
 		std::set<std::string> out_bb() const;
@@ -58,13 +58,10 @@ class BasicBlock{
     private:
         static int bb_count;
         int bb_id;
-        std::vector<std::string> _lines;
+        std::vector<Line> _lines;
         std::vector<BasicBlock*> _children;
         std::vector<BasicBlock*> _parents;
 };
 
-std::set<std::string> use(const std::string& line);
-std::set<std::string> def(const std::string& line);
-                                                         
 std::set<std::string> in(const std::string& line);
 std::set<std::string> out(const std::string& line);

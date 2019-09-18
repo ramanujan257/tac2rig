@@ -11,10 +11,13 @@ void yyerror(std::string s){
     exit(EXIT_FAILURE);
 }
 
+void la(const std::vector<BasicBlock*>& bbs);
+
 extern int yylex();
 
 std::vector<BasicBlock*> basicBlocks;
 BasicBlock* currBB = new BasicBlock();
+int exit_id;
 
 BasicBlock* getCurrentBB(){
     return currBB;
@@ -120,6 +123,7 @@ int main(){
     yyparse();
 
 	BasicBlock* exitBB = new BasicBlock();
+	exit_id = exitBB->getID();
 
 	for (int i=0; i<basicBlocks.size(); i++) {
 		std::vector<BasicBlock*> children = basicBlocks[i]->getChildren();
@@ -136,10 +140,21 @@ int main(){
 		if (exit) basicBlocks[i]->addChild(exitBB);
 	}
 
+	la(basicBlocks);
+
 	for (auto b : basicBlocks) {
 		std::cout << "B" << b->getID() << ":\n";
+		std::cout << "in[B" << b->getID() << "] = {";
+		b->print_in();
+		std::cout << "}; out[B" << b->getID() << "] = {";
+		b->print_out();
+		std::cout << "}\n\n";
 		for (Line l : b->getLines()) {
-			std::cout << l.line() << std::endl;
+			std::cout << l.line() << "\t{";
+			l.print_use();
+			std::cout << "}{";
+			l.print_def();
+			std::cout << "}\n";
 		}
 		
 		auto children = b->getChildren();
@@ -153,3 +168,28 @@ int main(){
 
     return 0;
 }
+
+
+void la(const std::vector<BasicBlock*>& bbs)
+{
+	std::vector<std::set<std::string>> prev_ins(bbs.size(),{""});
+	std::vector<std::set<std::string>> curr_ins(bbs.size(),{""});
+	
+	bool in_changed = true;
+	while(in_changed) {
+		for (int i=0; i<bbs.size(); i++) {
+			if (bbs[i]->getID() != exit_id) {
+				auto out = bbs[i]->out_bb();
+				auto in = bbs[i]->in_bb();
+				curr_ins[i] = in;
+			}
+		}	
+		in_changed = !(std::equal(prev_ins.cbegin(), prev_ins.cend(),
+					curr_ins.cbegin()));
+
+		// FIXME(mene, ne kod :-) ) debil zaboravio da azurira prethodne in-ove
+		// plus jos milion drugih glupljih gresaka, ali da
+		prev_ins = curr_ins;
+	}
+}
+

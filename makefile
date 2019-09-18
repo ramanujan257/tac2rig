@@ -22,4 +22,4 @@ basic_blocks.o: basic_blocks.cpp basic_blocks.hpp
 .PHONY: clean
 
 clean: 
-	rm *.o lex.yy.c *.tab.* out
+	rm *.tab.* *.o lex.yy.c out

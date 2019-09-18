@@ -4,6 +4,8 @@
 #include <string>
 #include <regex>
 #include <vector>
+#include <iostream>
+#include <iterator>
 
 
 class Line {
@@ -20,6 +22,9 @@ public:
 
 	void set_in(const std::set<std::string>& in);
 	void set_out(const std::set<std::string>& out);
+
+	void print_use() const;
+	void print_def() const;
 
 	friend std::ostream& operator<< (std::ostream& out, const Line& l);
 

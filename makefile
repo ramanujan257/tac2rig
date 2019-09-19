@@ -1,17 +1,8 @@
-out: lex.yy.o parser.tab.o basic_blocks.o line.o
+out: test_ideje.o basic_blocks.o line.o
 	g++ -std=c++11 -o $@ $^
 
-lex.yy.o: lex.yy.c parser.tab.hpp basic_blocks.hpp
+test_ideje.o: test_ideje.cpp line.hpp basic_blocks.hpp
 	g++ -std=c++11 -c -o $@ $<
-
-parser.tab.o: parser.tab.cpp parser.tab.hpp basic_blocks.hpp 
-	g++ -std=c++11 -c -o $@ $<
-
-parser.tab.cpp parser.tab.hpp: parser.ypp
-	bison -d -v $<
-
-lex.yy.c: lexer.lex
-	flex $<
 
 line.o: line.cpp line.hpp
 	g++ -std=c++11 -c -o $@ $<

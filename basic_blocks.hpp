@@ -16,6 +16,13 @@ class BasicBlock{
 				m_def{{""}},
 				m_in{{""}},
 				m_out{{""}}
+        {std::cout << "created BB" << bb_id << std::endl;}
+
+	BasicBlock(std::string s)
+		:bb_id{-1}, m_use{{""}},
+				m_def{{""}},
+				m_in{{""}},
+				m_out{{""}}
         {}
 
         void addLine(std::string& line){
@@ -53,6 +60,10 @@ class BasicBlock{
         int getID(){
             return bb_id;
         }
+
+	static int const getBBCount(){
+		return bb_count;	
+	}
 
 		friend std::set<std::string> in(const BasicBlock& bb, const Line& line);
 		friend std::set<std::string> out(const BasicBlock& bb, const Line& line);

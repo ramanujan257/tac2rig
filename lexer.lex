@@ -17,6 +17,7 @@
 
 "if"	{ return if_token;	}
 "goto"  { return goto_token; }
+"return" { return return_token; }
 
 [0-9]+  { yylval.n= std::stoi(yytext);
           return num_token; }

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#define YYDEBUG 1
+////#define YYDEBUG 1
 
 #include "basic_blocks.hpp"
 
@@ -11,13 +11,16 @@ void yyerror(std::string s){
     exit(EXIT_FAILURE);
 }
 
-void la(const std::vector<BasicBlock*>& bbs);
+void liveness_analysis(const std::vector<BasicBlock*>& bbs);
 
 extern int yylex();
 
 std::vector<BasicBlock*> basicBlocks;
 BasicBlock* currBB = new BasicBlock();
 int exit_id;
+
+std::vector<int> leaders{1};
+std::map<int, std::vector<BasicBlock*>> jumpers;
 
 BasicBlock* getCurrentBB(){
     return currBB;
@@ -48,49 +51,103 @@ BasicBlock* bbLookup(int address){
 
 %token<n> num_token
 %token<s> id_token
-%token goto_token if_token
+%token goto_token if_token return_token
 %type<s> Linija E
 
-%left '<' '='
+%right return_token
+%left '<' '=' '>'
 %left '+' '-'
 %left '*'
 
 %%
 Program: Program Linija '\n' {
-            //std::cout << "Program nl Linija" << std::endl;
-            getCurrentBB()->addLine(*$2);
+
+            
+            
+            std::map<int, std::vector<BasicBlock*>>::iterator it;
+            BasicBlock* newBB;
+			if(std::find(leaders.cbegin(), leaders.cend(), std::stoi(*$2)) != leaders.cend()){
+				
+				std::cout << "Leader found: " << *$2 << std::endl;
+				std::cout << "Looking for " << std::stoi(*$2) << std::endl;
+				if((it = jumpers.find(std::stoi(*$2))) != jumpers.cend()){
+					newBB = new BasicBlock();
+					basicBlocks.push_back(newBB);
+					std::cout << "============"<<newBB<<"===========" << std::endl;
+					std::cout << it->first << std::endl; //na ovo
+					std::cout << it->second[0]->getID() << std::endl; //skace ovaj
+					
+					for(auto parent = it->second.cbegin(); parent != it->second.cend(); parent++){
+						(*parent)->addChild(newBB);
+						newBB->addParent(*parent);
+					}
+					std::cout << "=======================" << std::endl;
+				} else {
+					std::cout << "+++++++++++++++++++++++" << std::endl;
+					newBB = new BasicBlock();
+					basicBlocks.push_back(newBB);
+					std::cout << "+++++++++++++++++++++++" << std::endl;
+				}
+				
+				
+				setCurrentBB(newBB);
+				std::cout << "set newBB" << newBB << std::endl;
+			}
+			std::cout << "adding " << *$2 << " to BB" << getCurrentBB()->getID() << std::endl;
+			getCurrentBB()->addLine(*$2);
         }
         |Linija '\n' {
-            //std::cout << "Linija" << std::endl;
-            getCurrentBB()->addLine(*$1);
+        	// First line
+        	// TODO: change leaders to std::set
+        	//leaders.push_back(1);
+        	
+            if(std::find(leaders.cbegin(), leaders.cend(), std::stoi(*$1)) != leaders.cend())
+				std::cout << "Leaders first: " << *$1 << std::endl;
+			getCurrentBB()->addLine(*$1);
         }
         ;
 
 Linija: num_token ':' id_token ':' '=' E {
-            $$ = new std::string(std::to_string($1) + ":" + *$3 + ":=" + *$6);
+           	$$ = new std::string(std::to_string($1) + ":" + *$3 + ":=" + *$6);
+	    	//getCurrentBB()->addLine(*$$);
             }
        | num_token ':' id_token '[' id_token ']' ':' '=' E {
             $$ = new std::string(std::to_string($1) + ":" + *$3 + "[" + *$5 + "]:=" + *$9);
+	    	//getCurrentBB()->addLine(*$$);
        }
        | num_token ':' if_token E goto_token '(' num_token ')' {
         
-            BasicBlock* curr = getCurrentBB();
-            BasicBlock* elseBB = new BasicBlock();
-            basicBlocks.push_back(elseBB);
-            curr->addChild(elseBB);
-            elseBB->addParent(curr);
-            BasicBlock* thenBB = bbLookup($7);
-            if(!thenBB){
-                thenBB = new BasicBlock();
-                basicBlocks.push_back(thenBB);
-            }
-            curr->addChild(thenBB);
-            thenBB->addParent(curr);
-       
-            $$ = new std::string(std::to_string($1) + ": if " + *$4 + " goto B" + std::to_string(thenBB->getID())); 
+        	leaders.push_back($1+1);
+        	leaders.push_back($7);
+        	
+        	// Na koju liniju
+        	// Ko skace
 
-            setCurrentBB(elseBB);
+         	BasicBlock* curr = getCurrentBB();        	
+        	jumpers[$7].push_back(curr);
+        	//std::cout << "PUSHED BACK " << jumpers[$7][0]->getID() << std::endl;
+        
+
+            //BasicBlock* elseBB = new BasicBlock();
+            //basicBlocks.push_back(elseBB);
+            //curr->addChild(elseBB);
+            //elseBB->addParent(curr);
+            //BasicBlock* thenBB = bbLookup($7);
+            //if(!thenBB){
+            //    thenBB = new BasicBlock();
+            //    basicBlocks.push_back(thenBB);
+            //}
+            //curr->addChild(thenBB);
+            //thenBB->addParent(curr);
+       
+            $$ = new std::string(std::to_string($1) + ": if " + *$4 + " goto B __plchldr__"); 
+	   		//getCurrentBB()->addLine(*$$);
+            //setCurrentBB(elseBB);
        }
+	   | num_token ':' return_token E {
+			$$ = new std::string(std::to_string($1) + ": return " + *$4);
+			//getCurrentBB()->addLine(*$$);
+	   }
        ;
 
 E: E '+' E {
@@ -105,6 +162,9 @@ E: E '+' E {
     | E '<' '=' E {
         $$ = new std::string(*$1 + "<=" + *$4);
     }
+	| E '>' E {
+		$$ = new std::string(*$1 + ">" + *$3);
+	}
     | id_token {
         $$ = $1;
     }
@@ -115,24 +175,46 @@ E: E '+' E {
 
 %%
 
+void print_block(BasicBlock* bb){
+	std::cout << "BLOCK" << bb->getID() << std::endl;
+	auto lines = bb->getLines();
+	for (auto l : lines)
+		std::cout << l << std::endl;
+	std::cout << "BLOCK_END" << std::endl;
+}
+
 int main(){
 
-//  yydebug = 1;
+	//yydebug = 1;
+	
 	basicBlocks.push_back(currBB);
 
+	// Create basic blocks
     yyparse();
 
-	BasicBlock* exitBB = new BasicBlock();
-	exit_id = exitBB->getID();
+	for(auto it = jumpers.cbegin(); it != jumpers.cend(); ++it){
+		std::cout << it->first << " is jumped at by BB \n";
+		for(auto iter = it->second.cbegin(); iter != it->second.cend(); iter++){
+			std::cout << (*iter)->getID() << std::endl;
+		}
+	}
 
+	// Create exit block
+	BasicBlock* exitBB = new BasicBlock("exit");
+	exit_id = exitBB->getID();
+	basicBlocks.push_back(exitBB);
+
+	for(int i = 0; i < basicBlocks.size(); i++){
+		print_block(basicBlocks[i]);
+	}
+	
 	for (int i=0; i<basicBlocks.size(); i++) {
 		std::vector<BasicBlock*> children = basicBlocks[i]->getChildren();
 		
 		bool exit = true;
 		for (auto c : children) {
-			auto found = std::find(basicBlocks.cbegin(),
-								   basicBlocks.cbegin()+i, c);
-			if (found != basicBlocks.cend()) {
+			auto found = std::find(basicBlocks.cbegin(), basicBlocks.cbegin()+i, c);
+			if (found != basicBlocks.cbegin()+i) {
 				exit = false;
 			}
 		}
@@ -140,7 +222,7 @@ int main(){
 		if (exit) basicBlocks[i]->addChild(exitBB);
 	}
 
-	la(basicBlocks);
+	liveness_analysis(basicBlocks);
 
 	for (auto b : basicBlocks) {
 		std::cout << "B" << b->getID() << ":\n";
@@ -170,17 +252,21 @@ int main(){
 }
 
 
-void la(const std::vector<BasicBlock*>& bbs)
+void liveness_analysis(const std::vector<BasicBlock*>& bbs)
 {
 	std::vector<std::set<std::string>> prev_ins(bbs.size(),{""});
 	std::vector<std::set<std::string>> curr_ins(bbs.size(),{""});
 	
 	bool in_changed = true;
 	while(in_changed) {
+	//std::cout << "inloop" << std::endl;
 		for (int i=0; i<bbs.size(); i++) {
+			//std::cout << "inner_loop_parser" << std::endl;
 			if (bbs[i]->getID() != exit_id) {
+				//std::cout << "IF bb = " << bbs[i]->getID() << std::endl;
 				auto out = bbs[i]->out_bb();
 				auto in = bbs[i]->in_bb();
+				//std::cout << "ENDIF" << std::endl;
 				curr_ins[i] = in;
 			}
 		}	

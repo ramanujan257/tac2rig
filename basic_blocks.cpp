@@ -58,8 +58,12 @@ std::set<std::string> BasicBlock::use()
 {
 	// FIXME: bb_id 4 je za exit blok; napraviti konstruktor koji prepoznaje 
 	// 		  Exit blok
-	if (bb_id == 4) return std::set<std::string>();
+	//std::cout << "MAXXXXXXXXXXXX \n" << BasicBlock::getBBCount() << "\n========ads=dasdasdas\n" << bb_id << std::endl;
 	std::vector<Line> lines = getLines();
+	if (lines.size() == 0) return std::set<std::string>();
+	
+	//std::cout << "1" << std::endl;
+	//std::cout << "lines.size() " << lines.size() << " for BB " << getID() << std::endl; 
 	m_use = lines[0].use();
 	std::set<std::string> defs = lines[0].def();
 	std::set<std::string> diff;
@@ -90,7 +94,7 @@ std::set<std::string> BasicBlock::def()
 {
 	// FIXME: bb_id 4 je za exit blok; napraviti konstruktor koji prepoznaje 
 	// 		  Exit blok
-	if (bb_id == 4) return std::set<std::string>();
+	if (bb_id == -1) return std::set<std::string>();
 
 	// def[B] = Union{i=1;i=num_lines}def[s_i], s_i = i-ta linija
 	std::vector<Line> lines = getLines();
@@ -121,23 +125,39 @@ std::set<std::string> BasicBlock::in_bb()
 	std::set<std::string> diff{""};
 	std::set<std::string> def_set(def());
 	std::set<std::string> out = m_out;
+
+	//std::cout << "in_bb()" << std::endl;
 	std::set_difference(out.cbegin(), out.cend(),
 						def_set.cbegin(), def_set.cend(),
 						std::inserter(diff, diff.end()));
+	//std::cout << "didn't crack after diff" << std::endl;
 
 	std::set<std::string> use_set(use());
+	//std::cout << "didn't crack after use()" << std::endl;
 	std::set_union(use_set.cbegin(), use_set.cend(),
 				   diff.cbegin(), diff.cend(),
 				   std::inserter(m_in, m_in.end()));
+	//std::cout << "didn't crack after set_union()" << std::endl;
+	//std::cout << "END in_bb()" << std::endl;
 	//print_in();
 
 	return std::set<std::string>(m_in);
 }
 
+void print_set(std::set<std::string> set){
+	std::cout << "============" << std::endl;	
+	for (auto el : set)
+		std::cout << el << std::endl;
+	std::cout << "============" << std::endl;
+}
+
 std::set<std::string> BasicBlock::out_bb()
 {
+	//std::cout << "out_bb()" << std::endl;
 	for (auto c : _children){
+		//std::cout << "inner_loop_BB" << std::endl;
 		auto tmp_in = c->in_bb();
+		//std::cout << "didn't crack" << std::endl;
 		std::set_union(m_out.begin(), m_out.end(),
 					   tmp_in.cbegin(), tmp_in.cend(),
 					   std::inserter(m_out, m_out.end()));

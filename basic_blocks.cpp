@@ -126,14 +126,11 @@ std::set<std::string> BasicBlock::in_bb()
 	std::set<std::string> def_set(def());
 	std::set<std::string> out = m_out;
 
-	//std::cout << "in_bb()" << std::endl;
 	std::set_difference(out.cbegin(), out.cend(),
 						def_set.cbegin(), def_set.cend(),
 						std::inserter(diff, diff.end()));
-	//std::cout << "didn't crack after diff" << std::endl;
 
 	std::set<std::string> use_set(use());
-	//std::cout << "didn't crack after use()" << std::endl;
 	std::set_union(use_set.cbegin(), use_set.cend(),
 				   diff.cbegin(), diff.cend(),
 				   std::inserter(m_in, m_in.end()));
@@ -144,20 +141,10 @@ std::set<std::string> BasicBlock::in_bb()
 	return std::set<std::string>(m_in);
 }
 
-void print_set(std::set<std::string> set){
-	std::cout << "============" << std::endl;	
-	for (auto el : set)
-		std::cout << el << std::endl;
-	std::cout << "============" << std::endl;
-}
-
 std::set<std::string> BasicBlock::out_bb()
 {
-	//std::cout << "out_bb()" << std::endl;
 	for (auto c : _children){
-		//std::cout << "inner_loop_BB" << std::endl;
 		auto tmp_in = c->in_bb();
-		//std::cout << "didn't crack" << std::endl;
 		std::set_union(m_out.begin(), m_out.end(),
 					   tmp_in.cbegin(), tmp_in.cend(),
 					   std::inserter(m_out, m_out.end()));

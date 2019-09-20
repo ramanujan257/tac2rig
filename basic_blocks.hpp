@@ -17,28 +17,25 @@ class BasicBlock{
 				m_in{{""}},
 				m_out{{""}},
 				m_role{0} // TODO: enum
-        {std::cout << "created BB" << bb_id << " on " << this << std::endl;}
+        {}
 
 	BasicBlock(std::string s)
 		:bb_id{-1}, m_use{{""}},
 				m_def{{""}},
 				m_in{{""}},
 				m_out{{""}}
-        {std::cout << "created exitBB on " << this  << std::endl;}
+        {}
 
         void addLine(std::string& line){
-        	std::cout << "Adding " << line << " to " << bb_id << std::endl;
 			Line l(line);
             _lines.push_back(l);
         }
 
-        std::vector<Line> getLines() const
-		{
+        std::vector<Line> getLines() const{
             return _lines;
         }
 
         void addChild(BasicBlock* c){
-        	std::cout << "Adding kid " << c << " to BB" << bb_id << std::endl;
             _children.push_back(c);
         }
 

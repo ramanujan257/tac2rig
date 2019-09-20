@@ -19,6 +19,8 @@ void setCurrentBB(BasicBlock* bb);
 BasicBlock* bbLookup(int address);
 void print_block(BasicBlock* bb);
 
+void test_fun(BasicBlock* bb);
+
 void liveness_analysis(const std::vector<BasicBlock*>& bbs);
 
 BasicBlock* getCurrentBB(){
@@ -114,7 +116,7 @@ std::vector<BasicBlock*> parse(const std::string& fname){
 		// Create CFG
         for(auto bb : basicBlocks){
             if(bb->getID() != -1){
-		        std::string line_ = bb->getLines().back().line();
+//		        std::string line_ = bb->getLines().back().line();
 		        
 		        /*
 		        int idx = line_.find("goto");
@@ -138,7 +140,7 @@ std::vector<BasicBlock*> parse(const std::string& fname){
 		            }
 		            
 		        } */  
-		        
+		        /*
 		        switch(bb->getRole()){
 		        	case 0:
 		        		// Unconditional + unconditional
@@ -163,8 +165,13 @@ std::vector<BasicBlock*> parse(const std::string& fname){
 		        		bb->addChild(basicBlocks.back());
 		        		break;
 		        		}
+		        	case 3: {
+		        		// Then
+		        		std::string _line = bb->getLines().back().line();
+		        		break;
+		        	}
 		        		
-		        }
+		        }*/
 
 				// Blocks containing return have no children other than EXIT block
 				//idx = line_.find("return");
@@ -174,13 +181,14 @@ std::vector<BasicBlock*> parse(const std::string& fname){
 				// Non conditional
 				//if(basicBlocks[bb->getID+1])
 
+				/*
 				// Add children to all but last block
 				int ID = bb->getID();
 				if(ID < basicBlocks.size() - 1){
 					std::cout << ID << "SIZE " << basicBlocks.size() << std::endl;
 					bb->addChild(basicBlocks[ID+1]);
-				}	
-
+				}	*/
+				test_fun(bb);
 		        print_block(bb);
         }
         }
@@ -190,6 +198,45 @@ std::vector<BasicBlock*> parse(const std::string& fname){
 		print_block(exitBlock);
         
         return std::vector<BasicBlock*>();
+}
+
+// vrati mesto dokle je dosla? da bi mogao else da zna gde da nastavi
+// Ako je -1 to znaci da je dosla do kraja i else mora isto da dodje dotle (osim ako nema goto)
+void test_fun(BasicBlock* bb){
+	std::string _line = bb->getLines().back().line();
+	int jmp_addr = std::stoi(line_.substr(line_.rfind("(") + 1);
+	if(bb->getRole() == 2){
+		//RETURN
+		bb->addChild(basicBlocks.back());
+		//return -1 ??
+	} else if(bb->getRole() == 0 and bb->getID() < basicBlocks.size()-1){
+		// Normal block
+		// skace sledeci, exit ili neki random
+		// na random skace ako je u pitanju then => pre ovoga je pozvana funkcija za grananje => napravljena su deca u slucaju da je potrebno skociti na levog
+		// ostaju slucajevi kad se skace na exit ili na sledeci
+		// na exit se skace ako ne postoji sledeci (ako postoji ALI je zabranjen skok na njega, funkcija je vec podesila decu)
+		// if(bb->getID() == basicBlocks.size()-1) // poslednja je 
+		//		bb->addChild(basicBlocks.back())
+		// 
+		bb->addChild(basicBlocks[bb->getID()+1]);
+	} else {
+		// CONDITION
+		
+		// Start for then
+		BasicBlock* thenBB = bbLookup(jmp_addr);
+		//int addr_reached = test_fun(thenBB); // vrati adresu do koje si dosla
+		//if(thenBB dosla do kraja)
+		//	if(jmp_addr == std::stoi(_line) + 1)
+				//ELSE GOES TO EXIT
+				// bb->addChild(basicBlocks.back())
+		//	else{
+		//		BasicBlock* continue = bbLookup(addr_reached+1);
+		// 		if(continue){
+		//			bb->addChild(continue);
+		//			test_fun(continue);
+		//		}
+		//}
+	}
 }
 
 void liveness_analysis(const std::vector<BasicBlock*>& bbs)

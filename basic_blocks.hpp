@@ -15,17 +15,19 @@ class BasicBlock{
             :bb_id{bb_count++}, m_use{{""}},
 				m_def{{""}},
 				m_in{{""}},
-				m_out{{""}}
-        {std::cout << "created BB" << bb_id << std::endl;}
+				m_out{{""}},
+				m_role{0} // TODO: enum
+        {std::cout << "created BB" << bb_id << " on " << this << std::endl;}
 
 	BasicBlock(std::string s)
 		:bb_id{-1}, m_use{{""}},
 				m_def{{""}},
 				m_in{{""}},
 				m_out{{""}}
-        {}
+        {std::cout << "created exitBB on " << this  << std::endl;}
 
         void addLine(std::string& line){
+        	std::cout << "Adding " << line << " to " << bb_id << std::endl;
 			Line l(line);
             _lines.push_back(l);
         }
@@ -36,6 +38,7 @@ class BasicBlock{
         }
 
         void addChild(BasicBlock* c){
+        	std::cout << "Adding kid " << c << " to BB" << bb_id << std::endl;
             _children.push_back(c);
         }
 
@@ -61,6 +64,14 @@ class BasicBlock{
             return bb_id;
         }
 
+	void setRole(int r){
+		m_role = r;	
+	}
+
+	int getRole(){
+		return m_role;	
+	}
+
 	static int const getBBCount(){
 		return bb_count;	
 	}
@@ -82,6 +93,7 @@ class BasicBlock{
     private:
         static int bb_count;
         int bb_id;
+		int m_role; // TODO: enum
 		std::set<std::string> m_use;
 		std::set<std::string> m_def;
 		std::set<std::string> m_in;

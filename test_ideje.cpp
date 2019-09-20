@@ -5,8 +5,6 @@
 
 #include "basic_blocks.hpp"
 
-void liveness_analysis(const std::vector<BasicBlock*>& bbs);
-
 std::vector<BasicBlock*> basicBlocks;
 BasicBlock* currBB;// = new BasicBlock();
 int exit_id;
@@ -21,7 +19,7 @@ void print_block(BasicBlock* bb);
 
 void test_fun(BasicBlock* bb);
 
-void liveness_analysis(const std::vector<BasicBlock*>& bbs);
+void liveness_analysis(const std::vector<BasicBlock*> bbs);
 
 BasicBlock* getCurrentBB(){
     return currBB;
@@ -131,9 +129,11 @@ void parse(const std::string& fname){
             }
         }
     }
+    
+    
 }
 
-void liveness_analysis(const std::vector<BasicBlock*>& bbs)
+void liveness_analysis(const std::vector<BasicBlock*> bbs)
 {
 	std::vector<std::set<std::string>> prev_ins(bbs.size(),{""});
 	std::vector<std::set<std::string>> curr_ins(bbs.size(),{""});
@@ -141,7 +141,7 @@ void liveness_analysis(const std::vector<BasicBlock*>& bbs)
 	bool in_changed = true;
 	while(in_changed) {
 		for (int i=0; i<bbs.size(); i++) {
-			if (bbs[i]->getID() != exit_id) {
+			if (bbs[i]->getID() != -1) {
 				auto out = bbs[i]->out_bb();
 				auto in = bbs[i]->in_bb();
 				curr_ins[i] = in;

@@ -36,7 +36,8 @@ class BasicBlock{
         }
 
         void addChild(BasicBlock* c){
-            _children.push_back(c);
+            if(!(std::find(_children.cbegin(), _children.cend(), c) != _children.end()))
+                _children.push_back(c);
         }
 
         std::vector<BasicBlock*>& getChildren(){

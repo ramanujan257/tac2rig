@@ -143,7 +143,7 @@ std::set<std::string> BasicBlock::in_bb()
 
 std::set<std::string> BasicBlock::out_bb()
 {
-	for (auto c : _children){
+	for (auto c : this->getChildren()){
 		auto tmp_in = c->in_bb();
 		std::set_union(m_out.begin(), m_out.end(),
 					   tmp_in.cbegin(), tmp_in.cend(),

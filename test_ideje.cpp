@@ -159,7 +159,9 @@ void liveness_analysis(const std::vector<BasicBlock*>& bbs)
 
 int main(){
     
-    parse("bb_test2");
+    std::string filename;
+    std::cin >> filename;
+    parse(filename);
 	
 	liveness_analysis(basicBlocks);
 

@@ -6,6 +6,7 @@
 #include <regex>
 #include <set>
 #include <algorithm>
+#include <fstream>
 
 #include "line.hpp"
 
@@ -50,6 +51,33 @@ class BasicBlock{
 	void print_use() const;
 	void print_in() const;
 	void print_out() const;
+    
+    // Graphing
+    std::string toGraphNode(){
+        std::string result = "";
+        if(bb_id != -1){
+            result += "BB" + std::to_string(bb_id) + " [label = \"" ;
+            for(auto line : _lines){
+                result += line->line() + "\\l ";
+            }
+            result += "\"]\n";
+        } else {
+            result += "Exit [label = \"Exit\"]";
+        }
+        
+        return result;
+    }
+    
+    static std::set<std::string> cfg;
+    
+    static void toGraph(BasicBlock* root);
+    
+    static void saveGraph(std::string outputFilePath);
+    
+    void setVisited();
+    
+    bool isVisited();
+    
 
 	void clean_sets();
 
@@ -63,6 +91,8 @@ class BasicBlock{
         std::vector<Line*> _lines;
         std::vector<BasicBlock*> _children;
         std::vector<BasicBlock*> _parents;
+        
+        bool visited; // HACK: for graphing
 };
 
 std::set<std::string> line_in(const BasicBlock& bb, std::string& line);

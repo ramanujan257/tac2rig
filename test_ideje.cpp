@@ -176,11 +176,10 @@ void draw_graph(std::set<std::set<std::string>> live_variables, std::string outp
     std::set < std::string >::iterator it;
     std::set < std::string >::iterator it2;
 
-    
     std::ofstream outfile;
     outfile.open(outputFilePath);
     
-    outfile << "graph {\n";
+    outfile << "graph {\n[dpi=300]\n[concentrate=true]\n";
   
     for (auto ms: myset){
         if (ms.size () == 1){
@@ -207,11 +206,8 @@ void draw_graph(std::set<std::set<std::string>> live_variables, std::string outp
     std::stringstream command1;
     std::stringstream command2;
     std::string graphName = outputFilePath.substr(0,outputFilePath.rfind("."));
-    command1 << "dot -Tps " << outputFilePath << " -o " << graphName << "_graph.png";
+    command1 << "dot -Tpng " << outputFilePath << " -o " << graphName << "_graph.png";
     command2 << "gwenview " << graphName << "_graph.png";
-    
-    std::cout << command1.str() << "C1\n";
-    std::cout << command2.str() << "C2\n";
     
     std::system(command1.str().c_str());
     std::system(command2.str().c_str());
@@ -273,8 +269,11 @@ int main(){
 		
 		std::cout << std::endl;
 	}
-
-	std::string fOut = "out_test.dot";
+	
+	BasicBlock::toGraph(*basicBlocks.begin());
+    BasicBlock::saveGraph(filename+"CFG.dot");
+	
+	std::string fOut = filename+"RIG.dot";
 	draw_graph(myset, fOut);
     
     return 0;

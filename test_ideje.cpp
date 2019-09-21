@@ -143,6 +143,15 @@ void liveness_analysis(const std::vector<BasicBlock*> bbs)
 		for (int i=0; i<bbs.size(); i++) {
 			if (bbs[i]->getID() != -1) {
 				auto out = bbs[i]->out_bb();
+
+				// iteriraj unazad kroz blok i odredi in i out za svaku liniju
+				auto lines = bbs[i]->getLines();
+				for (auto l = lines.rbegin(); l != lines.rend(); l++) {
+					const BasicBlock& bb = *bbs[i];
+					l->set_out(line_out(bb, *l));
+					l->set_in(line_in(bb, *l));
+				}
+
 				auto in = bbs[i]->in_bb();
 				curr_ins[i] = in;
 			}
@@ -172,10 +181,10 @@ int main(){
 		b->print_out();
 		std::cout << "}\n\n";
 		for (Line l : b->getLines()) {
-			std::cout << l.line() << "\t{";
-			l.print_use();
-			std::cout << "}{";
-			l.print_def();
+			std::cout << l.line() << "\tin={";
+			l.print_in();
+			std::cout << "}, out={";
+			l.print_out();
 			std::cout << "}\n";
 		}
 		

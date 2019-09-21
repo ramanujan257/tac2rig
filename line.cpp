@@ -8,7 +8,7 @@ void print_set_l(std::set<std::string> set){
 }
 
 Line::Line(const std::string& s)
-	: m_content(s)
+	: m_content(s), m_in{{""}}, m_out{{""}}
 {
 	m_def = def(s);
 	m_use = use(s);
@@ -103,14 +103,34 @@ std::set<std::string> Line::out() const
 	return m_out;
 }
 
+// FIXME: ???
 void Line::set_in(const std::set<std::string>& in)
 {
-	m_in = in;
+	// NE RADI
+	for (auto el : in) {
+		m_in.insert(el);
+	}
+
+	// NE RADI
+	// m_in = std::set<std::string>(in);
+	std::cout << "linija in" << m_content << ": ";
+	print_in();
+	std::cout << std::endl;
 }
 
+// FIXME: ???
 void Line::set_out(const std::set<std::string>& out)
 {
-	m_out = out;
+	// NE RADI
+	for (auto el : out) {
+		m_out.insert(el);
+	}	
+	
+	// NE RADI
+	// m_out = std::set<std::string>(out);
+	std::cout << "linija out" << m_content << ": ";
+	print_out();
+	std::cout << std::endl;
 }
 
 std::string Line::line() const 
@@ -128,4 +148,26 @@ void Line::print_def() const
 {
 	std::copy(m_def.cbegin(), m_def.cend(),
 			std::ostream_iterator<std::string>(std::cout, " "));
+}
+
+void Line::print_in() const
+{
+	std::copy(m_in.cbegin(), m_in.cend(),
+			std::ostream_iterator<std::string>(std::cout, " "));
+}
+
+void Line::print_out() const
+{
+	std::copy(m_out.cbegin(), m_out.cend(),
+			std::ostream_iterator<std::string>(std::cout, " "));
+}
+
+bool Line::operator== (const Line& l) const
+{
+	return (m_content == l.line()) ? true : false;
+}
+
+bool Line::operator!= (const Line& l) const
+{
+	return (m_content != l.line()) ? true : false;
 }

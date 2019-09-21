@@ -2,62 +2,69 @@
 
 int BasicBlock::bb_count = 0;
 
-// FIXME: izmeni tako da odgovara klasi Line
-std::set<std::string> in(const BasicBlock& bb, const Line& line)
+void print_set(const std::set<std::string>& set)
 {
-	std::set<std::string> in_set;
+	std::copy(set.cbegin(), set.cend(),
+			std::ostream_iterator<std::string>(std::cout, " "));
+	std::cout << std::endl;
+}
+
+std::set<std::string> line_in(const BasicBlock& bb, Line& line)
+{
+	std::set<std::string> in_set({""});
 	std::set<std::string> use_set = line.use();	
 	std::set<std::string> def_set = line.def();
-	std::set<std::string> out_set = out(bb, line);
-	std::set<std::string> diff_set;
+	std::set<std::string> out_set = line.out();
+	std::set<std::string> diff_set({""});
 
-	/*
 	auto found = std::find(bb._lines.cbegin(), bb._lines.cend(), line);
 	if (found == bb._lines.end()) {
 		std::cerr << "Line is not in this block" << std::endl;
-		return std::set<std::string>();
+		return std::set<std::string>(); 
 	} 
 
-	set_difference(out_set.begin(), out_set.end(),
+	// diff[s] = out[s]\def[s]
+	std::set_difference(out_set.begin(), out_set.end(),
 				   def_set.begin(), def_set.end(),
 				   std::inserter(diff_set, diff_set.end())
 				   );
 
-	set_union(use_set.begin(), use_set.end(),
+	// in[s] = use[s] U diff[s]
+	std::set_union(use_set.begin(), use_set.end(),
 			  diff_set.begin(), diff_set.end(),
 			  std::inserter(in_set, in_set.end())
 			);
-	*/
 
 	return std::set<std::string>(in_set);
 }
 
-//FIXME: ne valja out fja (napraviti je tako da odgovara fji out_bb
-// izmeni tako da odgovara klasi Line
-std::set<std::string> out(const BasicBlock& bb, const Line& line)
+std::set<std::string> line_out(const BasicBlock& bb, Line& line)
 {
 	std::set<std::string> out_set;
 	
-/*
 	auto found = std::find(bb._lines.cbegin(), bb._lines.cend(), line);
 	if (found == bb._lines.cend()) {
 		std::cerr << "Line is not in this block" << std::endl;
 		return std::set<std::string>();
 	} else if (found == bb._lines.cend()-1) {
-		out_set.insert(bb.out_bb());
+		// out[s] = out[B], s - poslednja linija u B
+		auto set = bb.c_out_bb();
+		std::set_union(out_set.begin(), out_set.end(),
+					set.begin(), set.end(),
+					std::inserter(out_set, out_set.end()));
 	} else {
-		//FIXME: nije line, vec sledbenik od line
-		out_set = in(line);
+		// out[s] = in[s'], s' - naredna linija u bloku
+		auto set = (found+1)->in();
+		std::set_union(out_set.begin(), out_set.end(),
+					set.begin(), set.end(),
+					std::inserter(out_set, out_set.end()));
 	}
-*/
 
-	return out_set;
+	return std::set<std::string>(out_set);
 }
 
 std::set<std::string> BasicBlock::use() 
 {
-	// FIXME: bb_id 4 je za exit blok; napraviti konstruktor koji prepoznaje 
-	// 		  Exit blok
 	//std::cout << "MAXXXXXXXXXXXX \n" << BasicBlock::getBBCount() << "\n========ads=dasdasdas\n" << bb_id << std::endl;
 	std::vector<Line> lines = getLines();
 	if (lines.size() == 0) return std::set<std::string>();
@@ -69,16 +76,15 @@ std::set<std::string> BasicBlock::use()
 	std::set<std::string> diff;
 	for (int i=1; i<lines.size(); i++) {
 		std::set<std::string> use = lines[i].use();
+
 		/* use[s_i] \ Union{k=1;i}(def[s_k]) */
 		std::set_difference(use.begin(), use.end(),
 							defs.begin(), defs.end(),
 							std::inserter(diff, diff.end()));
-
 		
 		std::set_union(m_use.begin(), m_use.end(),
 					   diff.begin(), diff.end(),
 					   std::inserter(m_use, m_use.end()));
-
 		
 		std::set<std::string> def = lines[i].def();
 		std::set_union(defs.begin(), defs.end(),
@@ -144,7 +150,7 @@ std::set<std::string> BasicBlock::in_bb()
 std::set<std::string> BasicBlock::out_bb()
 {
 	for (auto c : this->getChildren()){
-		auto tmp_in = c->in_bb();
+		const auto tmp_in = c->in_bb();
 		std::set_union(m_out.begin(), m_out.end(),
 					   tmp_in.cbegin(), tmp_in.cend(),
 					   std::inserter(m_out, m_out.end()));
@@ -163,4 +169,14 @@ void BasicBlock::print_out() const
 {
 	std::copy(m_out.cbegin(), m_out.cend(),
 			std::ostream_iterator<std::string>(std::cout, " "));
+}
+
+std::set<std::string> BasicBlock::c_in_bb() const 
+{
+	return m_in;
+}
+
+std::set<std::string> BasicBlock::c_out_bb() const
+{
+	return m_out;
 }

@@ -74,14 +74,17 @@ class BasicBlock{
 		return bb_count;	
 	}
 
-		friend std::set<std::string> in(const BasicBlock& bb, const Line& line);
-		friend std::set<std::string> out(const BasicBlock& bb, const Line& line);
+		friend std::set<std::string> line_in(const BasicBlock& bb, Line& line);
+		friend std::set<std::string> line_out(const BasicBlock& bb, Line& line);
 
 		std::set<std::string> use();
 		std::set<std::string> def();
 
 		std::set<std::string> in_bb();
 		std::set<std::string> out_bb();
+
+		std::set<std::string> c_in_bb() const;
+		std::set<std::string> c_out_bb() const;
 
 		void print_def() const;
 		void print_use() const;
@@ -101,5 +104,5 @@ class BasicBlock{
         std::vector<BasicBlock*> _parents;
 };
 
-std::set<std::string> in(const std::string& line);
-std::set<std::string> out(const std::string& line);
+std::set<std::string> line_in(const BasicBlock& bb, std::string& line);
+std::set<std::string> line_out(const BasicBlock& bb, std::string& line);

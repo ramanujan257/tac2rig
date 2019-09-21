@@ -25,6 +25,11 @@ public:
 
 	void print_use() const;
 	void print_def() const;
+	void print_in() const;
+	void print_out() const;
+
+	bool operator== (const Line& l) const;
+	bool operator!= (const Line& l) const;
 
 	friend std::ostream& operator<< (std::ostream& out, const Line& l);
 

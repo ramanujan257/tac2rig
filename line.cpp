@@ -1,12 +1,5 @@
 #include "line.hpp"
 
-void print_set_l(std::set<std::string> set){
-	std::cout << "============" << std::endl;	
-	for (auto el : set)
-		std::cout << el << std::endl;
-	std::cout << "============" << std::endl;
-}
-
 Line::Line(const std::string& s)
 	: m_content(s), m_in{{""}}, m_out{{""}}
 {
@@ -103,43 +96,21 @@ std::set<std::string> Line::out() const
 	return m_out;
 }
 
-// FIXME: ???
-void Line::set_in(const std::set<std::string>& in)
-{
-	// NE RADI
-	for (auto el : in) {
+void Line::set_in(const std::set<std::string>& in){
+	for (auto el : in) 
 		m_in.insert(el);
-	}
-
-	// NE RADI
-	// m_in = std::set<std::string>(in);
-	std::cout << "linija in" << m_content << ": ";
-	print_in();
-	std::cout << std::endl;
 }
 
-// FIXME: ???
-void Line::set_out(const std::set<std::string>& out)
-{
-	// NE RADI
-	for (auto el : out) {
+void Line::set_out(const std::set<std::string>& out){
+	for (auto el : out)
 		m_out.insert(el);
-	}	
-	
-	// NE RADI
-	// m_out = std::set<std::string>(out);
-	std::cout << "linija out" << m_content << ": ";
-	print_out();
-	std::cout << std::endl;
 }
 
-std::string Line::line() const 
-{
+std::string Line::line() const{
 	return m_content;
 }
 
-void Line::print_use() const
-{
+void Line::print_use() const{
 	std::copy(m_use.cbegin(), m_use.cend(),
 			  std::ostream_iterator<std::string>(std::cout, " "));
 }

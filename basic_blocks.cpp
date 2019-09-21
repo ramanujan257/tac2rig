@@ -2,19 +2,40 @@
 
 int BasicBlock::bb_count = 0;
 
-void print_set(const std::set<std::string>& set)
-{
-	std::copy(set.cbegin(), set.cend(),
-			std::ostream_iterator<std::string>(std::cout, " "));
-	std::cout << std::endl;
+void BasicBlock::addLine(std::string& line){
+		Line* l = new Line(line);
+        _lines.push_back(l);
 }
 
-std::set<std::string> line_in(const BasicBlock& bb, Line& line)
+std::vector<Line*> BasicBlock::getLines() const{
+    return _lines;
+}
+
+void BasicBlock::addChild(BasicBlock* c){
+    if(!(std::find(_children.cbegin(), _children.cend(), c) != _children.end()))
+        _children.push_back(c);
+}
+
+std::vector<BasicBlock*>& BasicBlock::getChildren(){
+    return _children;
+}
+
+void BasicBlock::print(){
+    std::cout << "BB" << bb_id << std::endl;
+    for(auto l: _lines)
+        std::cout << l << std::endl;
+}
+
+int BasicBlock::getID(){
+    return bb_id;
+}
+
+std::set<std::string> line_in(const BasicBlock& bb, Line* line)
 {
 	std::set<std::string> in_set({""});
-	std::set<std::string> use_set = line.use();	
-	std::set<std::string> def_set = line.def();
-	std::set<std::string> out_set = line.out();
+	std::set<std::string> use_set = line->use();	
+	std::set<std::string> def_set = line->def();
+	std::set<std::string> out_set = line->out();
 	std::set<std::string> diff_set({""});
 
 	auto found = std::find(bb._lines.cbegin(), bb._lines.cend(), line);
@@ -38,7 +59,7 @@ std::set<std::string> line_in(const BasicBlock& bb, Line& line)
 	return std::set<std::string>(in_set);
 }
 
-std::set<std::string> line_out(const BasicBlock& bb, Line& line)
+std::set<std::string> line_out(const BasicBlock& bb, Line* line)
 {
 	std::set<std::string> out_set;
 	
@@ -54,7 +75,7 @@ std::set<std::string> line_out(const BasicBlock& bb, Line& line)
 					std::inserter(out_set, out_set.end()));
 	} else {
 		// out[s] = in[s'], s' - naredna linija u bloku
-		auto set = (found+1)->in();
+		auto set = (*(found+1))->in();
 		std::set_union(out_set.begin(), out_set.end(),
 					set.begin(), set.end(),
 					std::inserter(out_set, out_set.end()));
@@ -65,17 +86,14 @@ std::set<std::string> line_out(const BasicBlock& bb, Line& line)
 
 std::set<std::string> BasicBlock::use() 
 {
-	//std::cout << "MAXXXXXXXXXXXX \n" << BasicBlock::getBBCount() << "\n========ads=dasdasdas\n" << bb_id << std::endl;
-	std::vector<Line> lines = getLines();
+	std::vector<Line*> lines = getLines();
 	if (lines.size() == 0) return std::set<std::string>();
 	
-	//std::cout << "1" << std::endl;
-	//std::cout << "lines.size() " << lines.size() << " for BB " << getID() << std::endl; 
-	m_use = lines[0].use();
-	std::set<std::string> defs = lines[0].def();
+	m_use = lines[0]->use();
+	std::set<std::string> defs = lines[0]->def();
 	std::set<std::string> diff;
 	for (int i=1; i<lines.size(); i++) {
-		std::set<std::string> use = lines[i].use();
+		std::set<std::string> use = lines[i]->use();
 
 		/* use[s_i] \ Union{k=1;i}(def[s_k]) */
 		std::set_difference(use.begin(), use.end(),
@@ -86,7 +104,7 @@ std::set<std::string> BasicBlock::use()
 					   diff.begin(), diff.end(),
 					   std::inserter(m_use, m_use.end()));
 		
-		std::set<std::string> def = lines[i].def();
+		std::set<std::string> def = lines[i]->def();
 		std::set_union(defs.begin(), defs.end(),
 					   def.begin(), def.end(),
 					   std::inserter(defs, defs.end()));
@@ -103,9 +121,9 @@ std::set<std::string> BasicBlock::def()
 	if (bb_id == -1) return std::set<std::string>();
 
 	// def[B] = Union{i=1;i=num_lines}def[s_i], s_i = i-ta linija
-	std::vector<Line> lines = getLines();
+	std::vector<Line*> lines = getLines();
 	for (auto l : lines){
-		std::set<std::string> line_def(l.def());
+		std::set<std::string> line_def(l->def());
 		std::set_union(m_def.begin(), m_def.end(),
 					   line_def.begin(), line_def.end(),
 					   std::inserter(m_def, m_def.end()));
@@ -140,9 +158,6 @@ std::set<std::string> BasicBlock::in_bb()
 	std::set_union(use_set.cbegin(), use_set.cend(),
 				   diff.cbegin(), diff.cend(),
 				   std::inserter(m_in, m_in.end()));
-	//std::cout << "didn't crack after set_union()" << std::endl;
-	//std::cout << "END in_bb()" << std::endl;
-	//print_in();
 
 	return std::set<std::string>(m_in);
 }

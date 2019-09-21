@@ -19,7 +19,7 @@ void print_block(BasicBlock* bb);
 
 void test_fun(BasicBlock* bb);
 
-void liveness_analysis(const std::vector<BasicBlock*> bbs);
+void liveness_analysis(const std::vector<BasicBlock*>& bbs);
 
 BasicBlock* getCurrentBB(){
     return currBB;
@@ -32,7 +32,7 @@ void setCurrentBB(BasicBlock* bb){
 BasicBlock* bbLookup(int address){
     for(auto b : basicBlocks){
         for(auto l : b->getLines()){
-            if(std::stoi(l.line()) == address)
+            if(std::stoi(l->line()) == address)
                 return b;
         }
     }
@@ -108,7 +108,7 @@ void parse(const std::string& fname){
 	// Create CFG
     for(auto bb : basicBlocks){
         if(bb->getID() != -1){
-            std::string line_ = bb->getLines().back().line();
+            std::string line_ = bb->getLines().back()->line();
             int idx = line_.rfind("goto");
             if(idx != -1){
                 // Jump statement
@@ -133,7 +133,7 @@ void parse(const std::string& fname){
     
 }
 
-void liveness_analysis(const std::vector<BasicBlock*> bbs)
+void liveness_analysis(const std::vector<BasicBlock*>& bbs)
 {
 	std::vector<std::set<std::string>> prev_ins(bbs.size(),{""});
 	std::vector<std::set<std::string>> curr_ins(bbs.size(),{""});
@@ -145,13 +145,15 @@ void liveness_analysis(const std::vector<BasicBlock*> bbs)
 				auto out = bbs[i]->out_bb();
 
 				// iteriraj unazad kroz blok i odredi in i out za svaku liniju
-				auto lines = bbs[i]->getLines();
+				std::vector<Line*> lines = bbs[i]->getLines();
+                const BasicBlock& bb = *bbs[i];
 				for (auto l = lines.rbegin(); l != lines.rend(); l++) {
-					const BasicBlock& bb = *bbs[i];
-					l->set_out(line_out(bb, *l));
-					l->set_in(line_in(bb, *l));
+                    
+                    std::set<std::string> l_o = line_out(bb, *l);
+                	(*l)->set_out(l_o);
+					(*l)->set_in(line_in(bb, *l));
 				}
-
+                
 				auto in = bbs[i]->in_bb();
 				curr_ins[i] = in;
 			}
@@ -180,11 +182,11 @@ int main(){
 		std::cout << "}; out[B" << b->getID() << "] = {";
 		b->print_out();
 		std::cout << "}\n\n";
-		for (Line l : b->getLines()) {
-			std::cout << l.line() << "\tin={";
-			l.print_in();
+		for (Line* l : b->getLines()) {
+			std::cout << l->line() << "\tin={";
+			l->print_in();
 			std::cout << "}, out={";
-			l.print_out();
+			l->print_out();
 			std::cout << "}\n";
 		}
 		

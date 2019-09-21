@@ -162,6 +162,20 @@ std::set<std::string> BasicBlock::in_bb()
 	return std::set<std::string>(m_in);
 }
 
+std::string has_return(const std::string& l)
+{
+	int idx = l.rfind("return");
+	if (idx != -1) {
+		auto var = l.substr(l.rfind(" ")+1);
+		auto found = std::find_if(var.cbegin(), var.cend(), 
+								[] (char c) { return isalpha(c); });
+
+		return (found == var.cend()) ? "" : var;
+	}
+
+	return "";
+}
+
 std::set<std::string> BasicBlock::out_bb()
 {
 	for (auto c : this->getChildren()){
@@ -169,6 +183,11 @@ std::set<std::string> BasicBlock::out_bb()
 		std::set_union(m_out.begin(), m_out.end(),
 					   tmp_in.cbegin(), tmp_in.cend(),
 					   std::inserter(m_out, m_out.end()));
+	}
+	auto lines = _lines;
+	auto return_ = has_return(lines.back()->line());
+	if (return_ != "") {
+		m_out.insert(return_);
 	}
 
 	return std::set<std::string>(m_out);

@@ -169,8 +169,7 @@ void liveness_analysis(const std::vector<BasicBlock*>& bbs)
 }
 
 // TODO: Place live variables here
-std::set <std::set<std::string>> myset
-    {{"a","c"}, {"c"}, {"c", "d"}};
+std::set<std::set<std::string>> myset{};
 
 void draw_graph(std::set<std::set<std::string>> live_variables, std::string outputFilePath){
 
@@ -219,6 +218,27 @@ void draw_graph(std::set<std::set<std::string>> live_variables, std::string outp
     
 }
 
+void clean_sets(const std::vector<BasicBlock*>& bbs)
+{
+	for (auto bb : bbs) {
+		bb->clean_sets();
+	}
+}
+
+void construct_myset(std::set<std::set<std::string>>& myset,
+					std::vector<BasicBlock*>& bbs)
+{
+	for (auto bb : bbs) {
+		for (auto l : bb->getLines()) {
+			auto set = l->in();
+			myset.insert(set);
+			if (l == bb->getLines().back()) {
+				auto set = l->out();
+				myset.insert(set);
+			}
+		}
+	}
+}
 
 int main(){
     
@@ -227,6 +247,9 @@ int main(){
     parse(filename);
 	
 	liveness_analysis(basicBlocks);
+
+	clean_sets(basicBlocks);
+	construct_myset(myset, basicBlocks);
 
 	for (auto b : basicBlocks) {
 		std::cout << "in[B" << b->getID() << "] = {";
@@ -250,7 +273,7 @@ int main(){
 		
 		std::cout << std::endl;
 	}
-	
+
 	std::string fOut = "out_test.dot";
 	draw_graph(myset, fOut);
     

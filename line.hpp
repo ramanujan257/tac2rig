@@ -31,6 +31,8 @@ public:
 	bool operator== (const Line& l) const;
 	bool operator!= (const Line& l) const;
 
+	void clean();
+
 	friend std::ostream& operator<< (std::ostream& out, const Line& l);
 
 private:

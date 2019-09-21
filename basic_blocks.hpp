@@ -51,6 +51,8 @@ class BasicBlock{
 	void print_in() const;
 	void print_out() const;
 
+	void clean_sets();
+
     private:
         static int bb_count;
         int bb_id;

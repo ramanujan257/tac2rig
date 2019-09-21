@@ -91,7 +91,7 @@ std::set<std::string> Line::in() const
 	return m_in;
 }
 
-std::set<std::string> Line::out() const
+std::set<std::string> Line::out() const  
 {
 	return m_out;
 }
@@ -141,4 +141,15 @@ bool Line::operator== (const Line& l) const
 bool Line::operator!= (const Line& l) const
 {
 	return (m_content != l.line()) ? true : false;
+}
+
+void Line::clean()
+{
+	auto find = std::find_if(m_in.begin(), m_in.end(),
+				[] (std::string s) { return s.empty(); });
+	m_in.erase(find);
+	
+	find = std::find_if(m_out.begin(), m_out.end(),
+				[] (std::string s) { return s.empty(); });
+	m_out.erase(find);
 }

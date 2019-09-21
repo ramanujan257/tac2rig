@@ -214,3 +214,10 @@ std::set<std::string> BasicBlock::c_out_bb() const
 {
 	return m_out;
 }
+
+void BasicBlock::clean_sets()
+{
+	for (auto l : _lines) {
+		l->clean();
+	}
+}

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <sstream>
 
 #include "basic_blocks.hpp"
 
@@ -167,6 +168,57 @@ void liveness_analysis(const std::vector<BasicBlock*>& bbs)
 	}
 }
 
+// TODO: Place live variables here
+std::set <std::set<std::string>> myset
+    {{"a","c"}, {"c"}, {"c", "d"}};
+
+void draw_graph(std::set<std::set<std::string>> live_variables, std::string outputFilePath){
+
+    std::set < std::string >::iterator it;
+    std::set < std::string >::iterator it2;
+
+    
+    std::ofstream outfile;
+    outfile.open(outputFilePath);
+    
+    outfile << "graph {\n";
+  
+    for (auto ms: myset){
+        if (ms.size () == 1){
+        outfile << *ms.begin() << ";\n";
+        continue;
+        }
+
+        for (it = ms.begin (); it != ms.end (); ++it){
+
+        std::string a = *it;
+        it2 = std::set<std::string>::iterator (it);
+        it2++;
+        for (; it2 != ms.end (); it2++){
+            std::string b = *it2;
+            outfile << a << "--" << b << ";\n";
+            }
+        }
+    }
+    
+    outfile << "}";
+    
+    outfile.close();
+    
+    std::stringstream command1;
+    std::stringstream command2;
+    std::string graphName = outputFilePath.substr(0,outputFilePath.rfind("."));
+    command1 << "dot -Tps " << outputFilePath << " -o " << graphName << "_graph.png";
+    command2 << "gwenview " << graphName << "_graph.png";
+    
+    std::cout << command1.str() << "C1\n";
+    std::cout << command2.str() << "C2\n";
+    
+    std::system(command1.str().c_str());
+    std::system(command2.str().c_str());
+    
+}
+
 
 int main(){
     
@@ -199,7 +251,8 @@ int main(){
 		std::cout << std::endl;
 	}
 	
-	
+	std::string fOut = "out_test.dot";
+	draw_graph(myset, fOut);
     
     return 0;
 }

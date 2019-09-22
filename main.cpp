@@ -100,10 +100,6 @@ void parse(const std::string& fname){
 
     std::sort(leaders.begin(), leaders.end());
 
-	for (auto l : leaders) {
-		std::cout << std::to_string(l) << std::endl;
-	}
-
     for(int i = 0; i < leaders.size() - 1; i++){
         int from = leaders[i];
         int to = leaders[i+1];
@@ -245,8 +241,8 @@ void draw_graph(std::set<std::set<std::string>>& live_vars, std::string outputFi
     std::stringstream command1;
     std::stringstream command2;
     std::string graphName = outputFilePath.substr(0,outputFilePath.rfind("."));
-    command1 << "dot -Tpng " << outputFilePath << " -o " << graphName << "_graph.png";
-    command2 << "gwenview " << graphName << "_graph.png";
+    command1 << "dot -Tpng " << outputFilePath << " -o " << graphName << "_graph.png &";
+    command2 << "xdg-open " << graphName << "_graph.png &";
     
     std::system(command1.str().c_str());
     std::system(command2.str().c_str());

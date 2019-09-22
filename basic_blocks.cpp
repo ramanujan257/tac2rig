@@ -292,7 +292,7 @@ void BasicBlock::displayGraph(std::string filePath){
     std::stringstream command2;
     
     command1 << "dot -Tpng " << filePath << " -o " << filePath << "_graph.png &";
-    command2 << "gwenview " << filePath << "_graph.png &";
+    command2 << "xdg-open " << filePath << "_graph.png &";
     
     std::system(command1.str().c_str());
     std::system(command2.str().c_str());

@@ -1,0 +1,14 @@
+1: a := 5
+2: b := 3
+3: if a > b goto (7)
+4: t1 := a
+5: a := b
+6: b := t1
+7: t2 := b
+8: r := b-a
+9: if r < b goto (11)
+10: if r >= b goto (8)
+11: b := r
+12: a := t2
+13: if b >= 0 goto (7)
+14: return a

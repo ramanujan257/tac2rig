@@ -64,12 +64,25 @@ void parse(const std::string& fname){
             int idx = line.find("goto");
             if(idx != -1){
                 int i1 = line.find("(",idx) + 1;
-                leaders.push_back(std::stoi(line.substr(i1)));
-            if(input.peek() != -1)
-                leaders.push_back(line_no+1);
-            else
-                leaders.push_back(line_no);
-            }
+				auto find = std::find(leaders.cbegin(), leaders.cend(), std::stoi(line.substr(i1)));
+				if (find == leaders.cend()) {
+                	leaders.push_back(std::stoi(line.substr(i1)));
+				}
+			
+
+   		        if(input.peek() != -1) {
+   					auto find = std::find(leaders.cbegin(), leaders.cend(), line_no+1);
+   					if (find == leaders.cend()) {
+   		            	leaders.push_back(line_no+1);
+   					}
+   				}
+   		        else {
+   					auto find = std::find(leaders.cbegin(), leaders.cend(), line_no);
+   					if (find == leaders.cend()) {
+   		            	leaders.push_back(line_no);
+   					}
+   		        }
+			}
 
 			// Split on RETURN
 			idx = line.find("return");
@@ -85,9 +98,12 @@ void parse(const std::string& fname){
         input.close();
     }
 
-
     std::sort(leaders.begin(), leaders.end());
-        
+
+	for (auto l : leaders) {
+		std::cout << std::to_string(l) << std::endl;
+	}
+
     for(int i = 0; i < leaders.size() - 1; i++){
         int from = leaders[i];
         int to = leaders[i+1];
@@ -97,7 +113,7 @@ void parse(const std::string& fname){
         }
         basicBlocks.push_back(newBB);
     }
-        
+
     // Add last line to last block
     basicBlocks.back()->addLine(buffer.back());
 
@@ -105,7 +121,6 @@ void parse(const std::string& fname){
 	BasicBlock* exitBB = new BasicBlock("exit");
 	basicBlocks.push_back(exitBB);
 
-        
 	// Create CFG
     for(auto bb : basicBlocks){
         if(bb->getID() != -1){
@@ -130,8 +145,6 @@ void parse(const std::string& fname){
             }
         }
     }
-    
-    
 }
 
 void liveness_analysis(const std::vector<BasicBlock*>& bbs)

@@ -25,7 +25,7 @@ std::vector<BasicBlock*>& BasicBlock::getChildren(){
 void BasicBlock::print(){
     std::cout << "BB" << bb_id << std::endl;
     for(auto l: _lines)
-        std::cout << l << std::endl;
+        std::cout << l->line() << std::endl;
 }
 
 int BasicBlock::getID(){

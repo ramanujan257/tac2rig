@@ -1,7 +1,7 @@
-out: test_ideje.o basic_blocks.o line.o
+tac2rig: main.o basic_blocks.o line.o
 	g++ -std=c++11 -o $@ $^
 
-test_ideje.o: test_ideje.cpp line.hpp basic_blocks.hpp
+main.o: main.cpp line.hpp basic_blocks.hpp
 	g++ -std=c++11 -c -o $@ $<
 
 line.o: line.cpp line.hpp

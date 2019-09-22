@@ -235,6 +235,22 @@ bool BasicBlock::isVisited(){
     return visited;
 }
 
+// Graphing
+std::string BasicBlock::toGraphNode(){
+    std::string result = "";
+    if(bb_id != -1){
+        result += "BB" + std::to_string(bb_id) + " [label = \"" ;
+        for(auto line : _lines){
+            result += line->line() + "\\l ";
+        }
+        result += "\"]\n";
+    } else {
+        result += "Exit [label = \"Exit\"]";
+    }
+        
+    return result;
+}
+
 void BasicBlock::toGraph(BasicBlock* root){
         
 
@@ -245,11 +261,11 @@ void BasicBlock::toGraph(BasicBlock* root){
             for(auto c : children){
                 if(c->getID() != -1){
                     cfg.insert(c->toGraphNode());
-                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -- BB" + std::to_string(c->getID()) + "\n");
+                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -> BB" + std::to_string(c->getID()) + "\n");
                     toGraph(c);
                 } else {
                     cfg.insert(c->toGraphNode());
-                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -- Exit" + "\n");
+                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -> Exit" + "\n");
                 }
             }
         }
@@ -260,12 +276,25 @@ void BasicBlock::saveGraph(std::string outputFilePath){
     std::ofstream outfile;
     outfile.open(outputFilePath);
     
-    outfile << "graph G {\nnode [shape=box]\n";
+    outfile << "digraph G {\nnode [shape=box]\n";
     
     for(auto el : cfg)
         outfile << el << std::endl;
     
     outfile << "}";
     outfile.close();
+    
+}
+
+void BasicBlock::displayGraph(std::string filePath){
+    
+    std::stringstream command1;
+    std::stringstream command2;
+    
+    command1 << "dot -Tpng " << filePath << " -o " << filePath << "_graph.png &";
+    command2 << "gwenview " << filePath << "_graph.png &";
+    
+    std::system(command1.str().c_str());
+    std::system(command2.str().c_str());
     
 }

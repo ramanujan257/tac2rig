@@ -235,9 +235,6 @@ void draw_graph(std::set<std::set<std::string>>& live_vars, std::string outputFi
     command1 << "dot -Tpng " << outputFilePath << " -o " << graphName << "_graph.png";
     command2 << "gwenview " << graphName << "_graph.png";
     
-    std::cout << command1.str() << " C1\n";
-    std::cout << command2.str() << " C2\n";
-    
     std::system(command1.str().c_str());
     std::system(command2.str().c_str());
 }
@@ -265,10 +262,19 @@ void construct_live_vars(std::set<std::set<std::string>>& live_vars,
 	}
 }
 
-int main(){
+int main(int argc, char** argv){
     
+    
+    std::string usage = "Usage: tac2rig <inputPath>";
     std::string filename;
-    std::cin >> filename;
+    if(argc != 2){
+        std::cerr << usage << std::endl;
+        std::exit(-1);
+    }
+    filename = argv[1];
+    
+    
+    //std::cin >> filename;
     parse(filename);
 	
 	liveness_analysis(basicBlocks);
@@ -303,6 +309,7 @@ int main(){
 		
 	BasicBlock::toGraph(*basicBlocks.begin());
     BasicBlock::saveGraph(filename+"CFG.dot");
+    BasicBlock::displayGraph(filename+"CFG.dot");
 
 	std::string fOut = filename + "RIG.dot";
 	draw_graph(live_vars, fOut);

@@ -50,34 +50,17 @@ class BasicBlock{
 	void print_in() const;
 	void print_out() const;
     
-    // Graphing
-    std::string toGraphNode(){
-        std::string result = "";
-        if(bb_id != -1){
-            result += "BB" + std::to_string(bb_id) + " [label = \"" ;
-            for(auto line : _lines){
-                result += line->line() + "\\l ";
-            }
-            result += "\"]\n";
-        } else {
-            result += "Exit [label = \"Exit\"]";
-        }
-        
-        return result;
-    }
-    
+    // CFG construction and manipulation
     static std::set<std::string> cfg;
-    
+    std::string toGraphNode();
     static void toGraph(BasicBlock* root);
-    
     static void saveGraph(std::string outputFilePath);
+    static void displayGraph(std::string filePath);
     
     void setVisited();
-    
     bool isVisited();
     
-
-	void clean_sets();
+    void clean_sets();
 
     private:
         static int bb_count;

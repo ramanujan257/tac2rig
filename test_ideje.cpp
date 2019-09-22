@@ -214,7 +214,8 @@ void draw_graph(std::set<std::set<std::string>>& live_vars, std::string outputFi
 
 	// "draw" graph (dot format)
     outfile << "graph {\n";
-  
+    outfile << "[dpi=300]\n[concentrate=true]\n";
+
 	for (auto e : edges) {
 		if (e.second != "") {
 			outfile << e.first << "--" << e.second << ";\n";
@@ -299,9 +300,15 @@ int main(){
 		
 		std::cout << std::endl;
 	}
-
+	
 	std::string fOut = "out_test.dot";
 	draw_graph(live_vars, fOut);
+	
+	BasicBlock::toGraph(*basicBlocks.begin());
+    BasicBlock::saveGraph(filename+"CFG.dot");
+	
+	std::string fOut = filename+"RIG.dot";
+	draw_graph(myset, fOut);
     
     return 0;
 }

@@ -2,6 +2,8 @@
 
 int BasicBlock::bb_count = 0;
 
+std::set<std::string> BasicBlock::cfg;
+
 void BasicBlock::addLine(std::string& line){
 		Line* l = new Line(line);
         _lines.push_back(l);
@@ -220,9 +222,50 @@ std::set<std::string> BasicBlock::out_bb() const
 	return m_out;
 }
 
-void BasicBlock::clean_sets()
-{
-	for (auto l : _lines) {
-		l->clean();
-	}
+void BasicBlock::clean_sets(){
+    for (auto l : _lines)
+        l->clean();
+}
+
+void BasicBlock::setVisited(){
+    visited = true;
+}
+
+bool BasicBlock::isVisited(){
+    return visited;
+}
+
+void BasicBlock::toGraph(BasicBlock* root){
+        
+
+        if(!root->isVisited()){
+            cfg.insert(root->toGraphNode());
+            root->setVisited();
+            auto children = root->getChildren();
+            for(auto c : children){
+                if(c->getID() != -1){
+                    cfg.insert(c->toGraphNode());
+                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -> BB" + std::to_string(c->getID()) + "\n");
+                    toGraph(c);
+                } else {
+                    cfg.insert(c->toGraphNode());
+                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -> Exit" + "\n");
+                }
+            }
+        }
+    }
+    
+void BasicBlock::saveGraph(std::string outputFilePath){
+    
+    std::ofstream outfile;
+    outfile.open(outputFilePath);
+    
+    outfile << "graph G {\nnode [shape=box]\n";
+    
+    for(auto el : cfg)
+        outfile << el << std::endl;
+    
+    outfile << "}";
+    outfile.close();
+    
 }

@@ -7,7 +7,7 @@
 #include "basic_blocks.hpp"
 
 std::vector<BasicBlock*> basicBlocks;
-BasicBlock* currBB;// = new BasicBlock();
+BasicBlock* currBB;
 int exit_id;
 
 std::vector<int> leaders{1};
@@ -162,62 +162,86 @@ void liveness_analysis(const std::vector<BasicBlock*>& bbs)
 		in_changed = !(std::equal(prev_ins.cbegin(), prev_ins.cend(),
 					curr_ins.cbegin()));
 
-		// FIXME(mene, ne kod :-) ) debil zaboravio da azurira prethodne in-ove
-		// plus jos milion drugih glupljih gresaka, ali da
 		prev_ins = curr_ins;
 	}
 }
 
-// TODO: Place live variables here
-std::set<std::set<std::string>> myset{};
+void find_edges(std::set<std::set<std::string>>& live_vars,
+	  std::vector<std::pair<std::string,std::string>>& edges)
+{
+	std::set<std::string>::iterator it;
+	std::set<std::string>::iterator it2;
 
-void draw_graph(std::set<std::set<std::string>> live_variables, std::string outputFilePath){
-
-    std::set < std::string >::iterator it;
-    std::set < std::string >::iterator it2;
-
-    
-    std::ofstream outfile;
-    outfile.open(outputFilePath);
-    
-    outfile << "graph {\n";
-  
-    for (auto ms: myset){
+	for (auto ms: live_vars){
         if (ms.size () == 1){
-        outfile << *ms.begin() << ";\n";
-        continue;
+			edges.push_back({*ms.begin(),""});
+        	continue;
         }
 
-        for (it = ms.begin (); it != ms.end (); ++it){
+        for (it = ms.begin (); it != ms.end (); ++it) {
 
-        std::string a = *it;
-        it2 = std::set<std::string>::iterator (it);
-        it2++;
-        for (; it2 != ms.end (); it2++){
-            std::string b = *it2;
-            outfile << a << "--" << b << ";\n";
+        	std::string a = *it;
+        	it2 = std::set<std::string>::iterator(it);
+        	it2++;
+        	for (; it2 != ms.end (); it2++) {
+            	std::string b = *it2;
+				if (a <= b) {
+					auto find = std::find(edges.cbegin(), edges.cend(), 
+							std::pair<std::string,std::string>({a,b}));
+					if (find == edges.cend()) {
+						edges.push_back({a,b});
+					}
+				} else {
+					auto find = std::find(edges.cbegin(), edges.cend(), 
+							std::pair<std::string,std::string>({b,a}));
+					if (find == edges.cend()) {
+						edges.push_back({b,a});
+					}
+				}
             }
         }
     }
+}
+
+void draw_graph(std::set<std::set<std::string>>& live_vars, std::string outputFilePath){
+
+    std::ofstream outfile;
+    outfile.open(outputFilePath);
+
+	// construct edge pairs
+    std::vector<std::pair<std::string,std::string>> edges;
+	find_edges(live_vars, edges);
+
+	// "draw" graph (dot format)
+    outfile << "graph {\n";
+  
+	for (auto e : edges) {
+		if (e.second != "") {
+			outfile << e.first << "--" << e.second << ";\n";
+		} else {
+			outfile << e.first << ";\n";
+		}
+	}
     
     outfile << "}";
     
     outfile.close();
     
+	// run commands for graph construction
     std::stringstream command1;
     std::stringstream command2;
     std::string graphName = outputFilePath.substr(0,outputFilePath.rfind("."));
-    command1 << "dot -Tps " << outputFilePath << " -o " << graphName << "_graph.png";
+    command1 << "dot -Tpng " << outputFilePath << " -o " << graphName << "_graph.png";
     command2 << "gwenview " << graphName << "_graph.png";
     
-    std::cout << command1.str() << "C1\n";
-    std::cout << command2.str() << "C2\n";
+    std::cout << command1.str() << " C1\n";
+    std::cout << command2.str() << " C2\n";
     
     std::system(command1.str().c_str());
     std::system(command2.str().c_str());
-    
 }
 
+// cleans all empty elements ("") from a set
 void clean_sets(const std::vector<BasicBlock*>& bbs)
 {
 	for (auto bb : bbs) {
@@ -225,16 +249,16 @@ void clean_sets(const std::vector<BasicBlock*>& bbs)
 	}
 }
 
-void construct_myset(std::set<std::set<std::string>>& myset,
+void construct_live_vars(std::set<std::set<std::string>>& live_vars,
 					std::vector<BasicBlock*>& bbs)
 {
 	for (auto bb : bbs) {
 		for (auto l : bb->getLines()) {
 			auto set = l->in();
-			myset.insert(set);
+			live_vars.insert(set);
 			if (l == bb->getLines().back()) {
 				auto set = l->out();
-				myset.insert(set);
+				live_vars.insert(set);
 			}
 		}
 	}
@@ -248,9 +272,11 @@ int main(){
 	
 	liveness_analysis(basicBlocks);
 
+	std::set<std::set<std::string>> live_vars{};
 	clean_sets(basicBlocks);
-	construct_myset(myset, basicBlocks);
+	construct_live_vars(live_vars, basicBlocks);
 
+	// print basic blocks with their in and out sets
 	for (auto b : basicBlocks) {
 		std::cout << "in[B" << b->getID() << "] = {";
 		b->print_in();
@@ -275,7 +301,7 @@ int main(){
 	}
 
 	std::string fOut = "out_test.dot";
-	draw_graph(myset, fOut);
+	draw_graph(live_vars, fOut);
     
     return 0;
 }

@@ -13,4 +13,4 @@ basic_blocks.o: basic_blocks.cpp basic_blocks.hpp
 .PHONY: clean
 
 clean: 
-	rm *.tab.* *.o lex.yy.c out
+	rm *.o out

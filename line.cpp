@@ -15,23 +15,23 @@ std::ostream& operator<< (std::ostream& out, const Line& l)
 
 std::set<std::string> Line::def(const std::string& s)
 {
-	std::string var_re = "([a-zA-Z_][a-zA-Z0-9_]*)";
-	// TODO: dodaj mogucnost nizova
-	std::string array_re = var_re + "\\[" + var_re + "\\]";
-	std::string num_re = "([0-9]+)"; // TODO: proveri da li ovo treba "(?:[0-9]+)
-	std::string varnum_re = "(" + var_re + "|" + num_re + ")";
+	std::string lval_re =
+	   	"([a-zA-Z_][a-zA-Z0-9_]*)(?:\\[(?:([a-zA-Z_][a-zA-Z0-9_]*)|(?:(?:[0-9]+)))\\])?";
+
+	std::string rval_re = "(?:([a-zA-Z_][a-zA-Z0-9_]*)(?:\\[(?:([a-zA-Z_][a-zA-Z0-9_]*)|(?:(?:[0-9]+)))\\])?|(?:(?:[0-9]+)))";
+
+	std::string optional_re = "(?:\\s*[+*/-]\\s*" + rval_re + ")?";
 	std::string line_num_re = "[1-9][0-9]*:\\s*";
 
-	std::regex assign_regex(
-			line_num_re +
-			var_re + "\\s*:=\\s*" + 
-			varnum_re + "\\s*([+*/-]\\s*" + 
-			varnum_re + ")?");
+	std::string str_assign_re = line_num_re + lval_re + 
+							"\\s*:=\\s*" + rval_re + optional_re;
+
+	std::regex assign_re(str_assign_re);
 
 	std::set<std::string> def_set;
 
-	if (std::regex_match(s, assign_regex)) {
-		def_set.insert(std::regex_replace(s, assign_regex, "$1"));
+	if (std::regex_match(s, assign_re)) {
+		def_set.insert(std::regex_replace(s, assign_re, "$1"));
 
 		return std::set<std::string>(def_set);
 	}
@@ -41,35 +41,45 @@ std::set<std::string> Line::def(const std::string& s)
 
 std::set<std::string> Line::use(const std::string& s)
 {
-	std::string var_re = "([a-zA-Z_][a-zA-Z0-9_]*)";
-	// TODO: dodaj mogucnost nizova
-	std::string array_re = var_re + "\\[" + var_re + "\\]";
-	std::string varnum_re = "(?:[1-9][0-9]*|"+var_re+")";
-	std::string line_num_re= "[1-9][0-9]*:\\s*";
+	std::string lval_re( 
+	   	"([a-zA-Z_][a-zA-Z0-9_]*)(?:\\[(?:([a-zA-Z_][a-zA-Z0-9_]*)|(?:(?:[0-9]+)))\\])?");
 
-	std::regex return_regex(line_num_re + "\\s*return\\s+" + varnum_re);
+	std::string rval_re("(?:([a-zA-Z_][a-zA-Z0-9_]*)(?:\\[(?:([a-zA-Z_][a-zA-Z0-9_]*)|(?:(?:[0-9]+)))\\])?|(?:(?:[0-9]+)))");
 
-	std::regex assign_regex(
-			line_num_re + var_re + "\\s*:=\\s*" + 
-			varnum_re + "(?:\\s*[+*/-]\\s*" + varnum_re + ")?");
+	std::string optional_re("(?:\\s*[+*/-]\\s*" + rval_re + ")?");
+	std::string line_num_re("[1-9][0-9]*:\\s*");
 
-	std::regex cond_regex(
-				line_num_re + "if\\s+" + var_re + "\\s*<=\\s*" + 
-				varnum_re + "\\s+goto\\s+B[0-9][0-9]*");
+	std::string str_assign_re(line_num_re + lval_re + 
+							"\\s*:=\\s*" + rval_re + optional_re);
+
+	std::string str_cond_re(line_num_re + "if\\s+" + lval_re + 
+				"\\s*[<>][=]?\\s*" + rval_re + "\\s+goto\\s+B[0-9][0-9]*");
+
+	std::string str_return_re(line_num_re + "\\s*return\\s+" + rval_re);
+
+	std::regex assign_re(str_assign_re);
+	std::regex cond_re(str_cond_re);
+	std::regex return_re(str_return_re);
 
 	std::string result;
 	std::set<std::string> use_set;
 
-	if (std::regex_match(s, return_regex)) {
-		use_set.insert(std::regex_replace(s, return_regex, "$1"));
+	if (std::regex_match(s, return_re)) {
+		use_set.insert(std::regex_replace(s, return_re, "$1"));
+		use_set.insert(std::regex_replace(s, return_re, "$2"));
 		return std::set<std::string>(use_set);
-	} else if (std::regex_match(s, assign_regex)) {
-		use_set.insert(std::regex_replace(s, assign_regex, "$2"));
-		use_set.insert(std::regex_replace(s, assign_regex, "$3"));
+	} else if (std::regex_match(s, assign_re)) {
+		use_set.insert(std::regex_replace(s, assign_re, "$2"));
+		use_set.insert(std::regex_replace(s, assign_re, "$3"));
+		use_set.insert(std::regex_replace(s, assign_re, "$4"));
+		use_set.insert(std::regex_replace(s, assign_re, "$5"));
+		use_set.insert(std::regex_replace(s, assign_re, "$6"));
 		return std::set<std::string>(use_set);
-	} else if (std::regex_match(s, cond_regex)) {
-		use_set.insert(std::regex_replace(s, cond_regex, "$1"));
-		use_set.insert(std::regex_replace(s, cond_regex, "$2"));
+	} else if (std::regex_match(s, cond_re)) {
+		use_set.insert(std::regex_replace(s, cond_re, "$1"));
+		use_set.insert(std::regex_replace(s, cond_re, "$2"));
+		use_set.insert(std::regex_replace(s, cond_re, "$3"));
+		use_set.insert(std::regex_replace(s, cond_re, "$4"));
 		return std::set<std::string>(use_set);
 	}
 	

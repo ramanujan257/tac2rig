@@ -245,11 +245,11 @@ void BasicBlock::toGraph(BasicBlock* root){
             for(auto c : children){
                 if(c->getID() != -1){
                     cfg.insert(c->toGraphNode());
-                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -> BB" + std::to_string(c->getID()) + "\n");
+                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -- BB" + std::to_string(c->getID()) + "\n");
                     toGraph(c);
                 } else {
                     cfg.insert(c->toGraphNode());
-                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -> Exit" + "\n");
+                    cfg.insert("BB" + std::string(std::to_string(root->getID())) + " -- Exit" + "\n");
                 }
             }
         }

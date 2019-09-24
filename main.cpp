@@ -241,7 +241,7 @@ void draw_graph(std::set<std::set<std::string>>& live_vars, std::string outputFi
     std::stringstream command1;
     std::stringstream command2;
     std::string graphName = outputFilePath.substr(0,outputFilePath.rfind("."));
-    command1 << "dot -Tpng " << outputFilePath << " -o " << graphName << "_graph.png &";
+    command1 << "dot -Tpng " << outputFilePath << " -o " << graphName << "_graph.png";
     command2 << "xdg-open " << graphName << "_graph.png &";
     
     std::system(command1.str().c_str());
@@ -315,6 +315,8 @@ int main(int argc, char** argv){
 		
 		std::cout << std::endl;
 	}
+
+	std::system("rm *.png");
 		
 	BasicBlock::toGraph(*basicBlocks.begin());
     BasicBlock::saveGraph(filename+"CFG.dot");

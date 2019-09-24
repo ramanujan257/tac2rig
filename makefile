@@ -13,4 +13,4 @@ basic_blocks.o: basic_blocks.cpp basic_blocks.hpp
 .PHONY: clean
 
 clean: 
-	rm *.o out
+	rm *.o tac2rig

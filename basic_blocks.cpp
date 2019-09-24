@@ -290,9 +290,12 @@ void BasicBlock::displayGraph(std::string filePath){
     
     std::stringstream command1;
     std::stringstream command2;
+
+	int idx = filePath.rfind(".");
+	std::string filePathShow = filePath.substr(0, idx);
     
-    command1 << "dot -Tpng " << filePath << " -o " << filePath << "_graph.png &";
-    command2 << "xdg-open " << filePath << "_graph.png &";
+    command1 << "dot -Tpng " << filePath << " -o " << filePathShow << ".png";
+    command2 << "xdg-open " << filePathShow << ".png &";
     
     std::system(command1.str().c_str());
     std::system(command2.str().c_str());
